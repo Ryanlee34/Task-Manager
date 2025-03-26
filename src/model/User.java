@@ -5,23 +5,32 @@ import java.time.Instant;
 /** Class that defines and handles authentication for each user of the Task Manager*/
 public class User {
 
-    private String uniqueId;
+    public enum AccountType {
+        CUSTOMER,
+        ADMIN;
+    }
+    private final AccountType accountType;
+    private final String userUniqueId;
     private String userName;
     private String password;
-    private Instant timeStamp;
+    private final Instant timeStamp;
     private String fullName;
     private String emailAddress;
 
     /**Validator Methods*/
     private void validateUserName(String userName) {
        if (userName== null || userName.trim().isEmpty()) {
-           throw new IllegalArgumentException("UserName can't be Null or Empty");
+           throw new IllegalArgumentException("UserName can't be Null or Empty.");
        }
     }
 
     private void validatePassword(String password) {
        if (password == null || password.trim().isEmpty()) {
-           throw new IllegalArgumentException("Password can't be Null or Empty");
+           throw new IllegalArgumentException("Password can't be Null or Empty.");
+       } else if (password.length() > 20) {
+           throw new IllegalArgumentException("Password must be a maximum 0f 20 Characters.");
+       } else if (password.contains(" ")) {
+           throw new IllegalArgumentException("Password cannot contain spaces.");
        }
     }
 
@@ -43,16 +52,38 @@ public class User {
         }
     }
 
-    /** Constructor */
+    private void validateAccountType(AccountType accountType) {
+        if ((accountType != AccountType.ADMIN)) {
+            throw new IllegalArgumentException("AccountType must be Admin.");
+        }
+    }
+
+    /** User Constructor */
     public User(String userName, String password, String fullName, String emailAddress) {
 
-        this.uniqueId = UUID.randomUUID().toString();
-
+        this.userUniqueId = UUID.randomUUID().toString();
+        this.accountType = AccountType.CUSTOMER;
         validateUserName(userName);
         validatePassword(password);
         validateFullName(fullName);
         validateEmailAddress(emailAddress);
 
+        this.userName = userName;
+        this.password = password;
+        this.timeStamp = Instant.now();
+        this.fullName = fullName;
+        this.emailAddress = emailAddress;
+
+    }
+    /** Admin Overloaded Constructor */
+    public User(String userName, String password, String fullName, String emailAddress,  AccountType accountType) {
+        this.userUniqueId = UUID.randomUUID().toString();
+        validateAccountType(accountType);
+        validateUserName(userName);
+        validatePassword(password);
+        validateFullName(fullName);
+        validateEmailAddress(emailAddress);
+        this.accountType = accountType;
         this.userName = userName;
         this.password = password;
         this.timeStamp = Instant.now();
@@ -72,7 +103,7 @@ public class User {
 
     /**Getters*/
     public String getUniqueId() {
-        return uniqueId;
+        return userUniqueId;
     }
 
     public String getUserName() {
@@ -89,6 +120,10 @@ public class User {
 
     public String getEmailAddress() {
         return emailAddress;
+    }
+
+    public AccountType getAccountType() {
+        return accountType;
     }
 
     /**Setters*/
@@ -113,11 +148,16 @@ public class User {
         this.emailAddress = emailAddress;
     }
 
+    /** Helper methods */
+    public boolean isAdmin() {
+        return this.accountType == AccountType.ADMIN;
+    }
+
     /**Override Methods*/
     @Override
     public String toString() {
         return "User{" +
-                "uniqueId='" + uniqueId + '\'' +
+                "uniqueId='" + userUniqueId + '\'' +
                 ", userName='" + userName + '\'' +
                 ", fullName='" + fullName + '\'' +
                 ", emailAddress='" + emailAddress + '\'' +
@@ -133,12 +173,12 @@ public class User {
 
         User user = (User) o;
 
-        return uniqueId.equals(user.uniqueId);
+        return userUniqueId.equals(user.userUniqueId);
     }
 
     @Override
     public int hashCode() {
-        return uniqueId.hashCode();
+        return userUniqueId.hashCode();
     }
 
 }

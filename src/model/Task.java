@@ -5,7 +5,7 @@ import java.time.LocalDate;
 
 public class Task {
 
-    private int id;
+    private int taskId;
     private String title;
     private String description;
     private LocalDate dueDate;
@@ -91,7 +91,7 @@ public class Task {
         validateStatus(status);
         validatePriority(priority);
 
-        this.id = id;
+        this.taskId = id;
         this.title = title;
         this.description = description;
         this.dueDate = dueDate;
@@ -101,7 +101,7 @@ public class Task {
 
     /** Getter Methods */
     public int getId() {
-            return id;
+        return taskId;
     }
 
     public String getTitle() {
@@ -127,7 +127,7 @@ public class Task {
     /**Setters */
     public void setId(int id) {
         validateId(id);
-        this.id = id;
+        this.taskId = id;
     }
 
     public void setTitle(String title) {
@@ -158,7 +158,7 @@ public class Task {
     /** Override Methods */
     @Override
     public String toString(){
-        return "Task{Title: " + title + ", Description: "+description+ ", Task ID: "+ id + ", Due Date: "+ dueDate + ", Status: "+ status+ ",Priority: " + priority+ "}";
+        return "Task{Title: " + title + ", Description: "+description+ ", Task ID: "+ taskId + ", Due Date: "+ dueDate + ", Status: "+ status+ ",Priority: " + priority+ "}";
     }
 
     @Override
@@ -172,7 +172,7 @@ public class Task {
 
     @Override
     public int hashCode() {
-        return 31 *  id + title.hashCode() + description.hashCode() + dueDate.hashCode() + status.hashCode() + priority.hashCode();
+        return 31 *  taskId + title.hashCode() + description.hashCode() + dueDate.hashCode() + status.hashCode() + priority.hashCode();
     }
 
 

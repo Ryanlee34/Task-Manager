@@ -6,7 +6,7 @@ import java.util.Objects;
 public class TaskCategory {
 
     /** Set variables*/
-    private int id;
+    private int categoryId;
     private String name;
     private String description;
 
@@ -35,7 +35,7 @@ public class TaskCategory {
         validateName(name);
         validateDescription(description);
 
-        this.id = id;
+        this.categoryId = categoryId;
         this.name = name;
         this.description = description;
 
@@ -43,7 +43,7 @@ public class TaskCategory {
 
     /** Getters*/
     public int getId() {
-        return id;
+        return categoryId;
     }
 
     public String getName() {
@@ -57,7 +57,7 @@ public class TaskCategory {
     /** Setters*/
     public void setId(int id) {
         validateId(id);
-        this.id = id;
+        this.categoryId = id;
     }
 
     public void setName(String name) {
@@ -79,11 +79,11 @@ public class TaskCategory {
         TaskCategory taskCategory = (TaskCategory) o;
 
         // If id is a primitive type (like int)
-        return id == taskCategory.id;
+        return categoryId == taskCategory.categoryId;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(categoryId);
     }
 }
