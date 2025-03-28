@@ -1,53 +1,67 @@
 package service;
 import repository.*;
 import model.*;
+import java.io.IOException;
 import java.util.List;
-import java.util.HashMap;
 import java.util.Map;
 import java.time.LocalDate;
 
 
 public class TaskManager {
     private String sessionToken = null;
-    private final Map<Integer, Integer> taskToTaskCat;
-    private final Map<String, Integer> userToCategory;
+    private String categoryToken = null;
+    private String taskToken = null;
+    private final Map<String, String> categoryToTaskMap;
+    private final Map<String, String> userToCategoryMap;
     private final UserRepository userCrud;
     private final TaskRepository taskCrud;
-    private final TaskCategoryRepository taskCatCrud;
+    private final TaskCategoryRepository categoryCrud;
+    private final DataHandler dataHandler;
 
 
 
     /**Constructor */
-    public TaskManager(Map<String, User> userMap, Map<Integer, Task> taskMap, Map<Integer, TaskCategory> taskCatMap, Map<String, Integer> userToCategory,Map<Integer, Integer> taskToTaskCat) {
+    public TaskManager(Map<String, User> userMap, Map<String, Task> taskMap, Map<String, TaskCategory> taskCatMap, Map<String, String> userToCategoryMap, Map<String, String> categoryToTaskMap, DataHandler dataHandler) {
 
         this.userCrud = new UserRepository(userMap);
         this.taskCrud = new TaskRepository(taskMap);
-        this.taskCatCrud = new TaskCategoryRepository(taskCatMap);
-        this.userToCategory = userToCategory;
-        this.taskToTaskCat = taskToTaskCat;
+        this.categoryCrud = new TaskCategoryRepository(taskCatMap);
+        this.userToCategoryMap = userToCategoryMap;
+        this.categoryToTaskMap = categoryToTaskMap;
+        this.dataHandler = dataHandler;
     }
+
 
     /** Relationship methods*/
-    private void createTaskCatToTaskRel(int taskId, int categoryId) {
-        taskToTaskCat.put(taskId, categoryId);
+    private void createCategoryToTaskRelationship(String taskId, String categoryId) {
+        categoryToTaskMap.put(taskId, categoryId);
     }
 
-    private void createUserToTask(String userId, int taskCatId) {
-        userToCategory.put(userId, taskCatId);
+    private void createUserToTaskRelationship(String userId, String taskCatId) {
+        userToCategoryMap.put(userId, taskCatId);
+    }
+
+    /** Getter methods for Relationship Maps */
+    public Map<String, String> getCategoryToTaskMap() {
+        return categoryToTaskMap;
+    }
+
+    public Map<String, String> getUserToCategoryMap() {
+        return userToCategoryMap;
     }
 
 
 
     /**Task Category Selection Method */
-    private Integer findCategoryIdByName(String categoryName) {
+    private String findCategoryIdByName(String categoryName) {
         if(!validSession()) {
             return null;
         }
 
-        List<TaskCategory> allCategories = taskCatCrud.readAll();
+        List<TaskCategory> allCategories = categoryCrud.readAll();
         for(TaskCategory category : allCategories) {
-            if(userToCategory.containsKey(sessionToken) &&
-                    userToCategory.get(sessionToken).equals(category.getId()) &&
+            if(userToCategoryMap.containsKey(sessionToken) &&
+                    userToCategoryMap.get(sessionToken).equals(category.getId()) &&
                     category.getName().equalsIgnoreCase(categoryName)) {
                 return category.getId();
             }
@@ -56,17 +70,44 @@ public class TaskManager {
     }
 
     /** Sign in/out Methods*/
-    public String authenticate(String userName, String password) {
+    public void signIn(String userName, String password) {
 
         List<User> users = userCrud.readAll();
 
         for (User user : users) {
             if (user.getUserName().equals(userName) && user.verifyPassword(password)) {
-                return sessionToken = user.getUniqueId();
+                sessionToken = user.getUniqueId();
+            } else {
+                throw new IllegalArgumentException("Invalid UserName or Password.");
             }
         }
-        return sessionToken = null;
     }
+
+    public void selectCategory(String categoryName) {
+        List<TaskCategory> categories = categoryCrud.readAll();
+
+        for (TaskCategory category: categories) {
+            if (category.getName().equals(categoryName)) {
+                categoryToken = category.getId();
+            } else {
+                throw new IllegalArgumentException("Invalid Category Selected");
+            }
+        }
+    }
+
+    public void selectTask(String taskName) {
+        List<Task> tasks = taskCrud.readAll();
+
+        for (Task task: tasks) {
+            if (task.getTitle().equals(taskName)) {
+                taskToken = task.getId();
+            } else {
+                throw new IllegalArgumentException("Invalid Category Selected");
+            }
+        }
+    }
+
+
 
     private boolean validSession(){
         if(sessionToken != null) {
@@ -75,98 +116,165 @@ public class TaskManager {
         throw new IllegalArgumentException("Must be signed in.");
     }
 
-    public String logOut() {
-        return sessionToken = null;
+    private void validCategoryToken() {
+        if (!categoryCrud.getCategoryMap().containsKey(categoryToken)) {
+            throw new IllegalArgumentException("Invalid Category Selected");
+        }
+    }
+
+    private void validTaskToken() {
+        if (!taskCrud.getTaskMap().containsKey(taskToken)) {
+            throw new IllegalArgumentException("Invalid Task Selected");
+        }
+    }
+
+
+    public void logOut() {
+        sessionToken = null;
+        categoryToken = null;
     }
 
     /**User CRUD Methods */
-    public void createUser(String userName, String password, String fullName, String emailAddress) {
+    public void createUser(String userName, String password, String fullName, String emailAddress) throws IOException {
         User newUser = new User(userName,password,fullName, emailAddress);
-        userCrud.create(newUser);
 
+        userCrud.create(newUser);
+        dataHandler.userJson(userCrud.getUserMap());
     }
 
-    public User readUser() {
+    public User readUser() throws IOException {
         validSession();
+        dataHandler.loadUserData();
         return userCrud.read(sessionToken);
     }
 
-    public void update(String userName, String password, String fullName, String emailAddress){
+    public void update(String userName, String password, String fullName, String emailAddress) throws IOException {
         validSession();
         User newUser = new User(userName,password,fullName,emailAddress);
 
+        //Update all HashMaps.
         userCrud.update(sessionToken, newUser);
+        userToCategoryMap.put(sessionToken, (userToCategoryMap.get(sessionToken)));
+
+        //Save updates to Json Files using HashMaps
+        dataHandler.userJson(userCrud.getUserMap());
+        dataHandler.userToCategoryJson(getUserToCategoryMap());
+
 
     }
 
-    public void deleteUser(String userId) {
+    public void deleteUser(String userId) throws IOException {
         validSession();
         userCrud.delete(userId);
-        userToCategory.remove(userId);
-        // Need to implement removal of associated tasks linked to categories removed!!
+
+        //Remove all relationships to user from HashMaps.
+        String categoryId = userToCategoryMap.get(userId);
+        userToCategoryMap.remove(userId, categoryId);
+        categoryToTaskMap.remove(categoryId);
+
+        //Update all Json Files using HashMaps
+        dataHandler.userJson(userCrud.getUserMap());
+        dataHandler.userToCategoryJson(getUserToCategoryMap());
+        dataHandler.categoryToTaskJson(getCategoryToTaskMap());
+
 
     }
 
     /**Task Category CRUD Methods */
-    public void createTaskCat(int categoryId, String name, String description) {
+    public void createTaskCat(String name, String description)throws IOException {
         validSession();
-        TaskCategory newTask = new TaskCategory(categoryId, name, description);
+        if (categoryCrud.getCategoryMap().containsKey(categoryToken)) {
+            throw new IllegalArgumentException("New CategoryId must be unique");
+        }
+        TaskCategory newTask = new TaskCategory( name, description);
 
-        createUserToTask(sessionToken, categoryId);
-        taskCatCrud.create(newTask);
-
+        createUserToTaskRelationship(sessionToken, categoryToken);
+        categoryCrud.create(newTask);
+        dataHandler.categoryJson(categoryCrud.getCategoryMap());
 
 
     }
 
-    public TaskCategory readTaskCat(int categoryId) {
+    public TaskCategory readTaskCat(String categoryId) {
         validSession();
 
-        return taskCatCrud.read(categoryId);
+        return categoryCrud.read(categoryId);
     }
 
 
-    public void updateTaskCat(int categoryId, String name, String description) {
+    public void updateTaskCat (String name, String description) throws IOException{
         validSession();
-        TaskCategory newTask = new TaskCategory(categoryId, name, description);
+        validCategoryToken();
+        TaskCategory newCat = new TaskCategory (name, description);
 
-        taskCatCrud.update(categoryId, newTask);
-        userToCategory.put(sessionToken, categoryId);
+        categoryCrud.update(categoryToken, newCat);
+        userToCategoryMap.put(sessionToken, categoryToken);
+        categoryToTaskMap.put(categoryToken,categoryToTaskMap.get(categoryToken));
+
+        dataHandler.categoryJson(categoryCrud.getCategoryMap());
+        dataHandler.userToCategoryJson(getUserToCategoryMap());
+        dataHandler.categoryToTaskJson(getCategoryToTaskMap());
+
     }
 
-    public void deleteTaskCat(int categoryId) {
+    public void deleteTaskCat() throws IOException{
         validSession();
-        userToCategory.remove(sessionToken, categoryId);
-        taskCatCrud.delete(categoryId);
+        validCategoryToken();
+
+        categoryCrud.delete(categoryToken);
+        userToCategoryMap.remove(sessionToken, categoryToken);
+        categoryToTaskMap.remove(categoryToken);
+
+        dataHandler.categoryJson(categoryCrud.getCategoryMap());
+        dataHandler.userToCategoryJson(getUserToCategoryMap());
+        dataHandler.categoryToTaskJson(getCategoryToTaskMap());
     }
 
     /**Task CRUD Methods */
-    public void createTask(int id, String title, String description, LocalDate dueDate, Task.Status status, Task.Priority priority, int categoryId) {
+    public void createTask(String title, String description, LocalDate dueDate, Task.Status status, Task.Priority priority)throws IOException {
         validSession();
-        Task newTask = new Task(id, title, description, dueDate, status, priority);
-        createUserToTask(sessionToken, id);
-        createTaskCatToTaskRel(id, categoryId);
+        validCategoryToken();
+
+        Task newTask = new Task(title, description, dueDate, status, priority);
+        createUserToTaskRelationship(sessionToken, categoryToken);
+        createCategoryToTaskRelationship(categoryToken, taskToken);
         taskCrud.create(newTask);
+
+        dataHandler.taskJson(taskCrud.getTaskMap());
+        dataHandler.categoryToTaskJson(getCategoryToTaskMap());
+
     }
 
-    public Task readTask(int id) {
+    public Task readTask(String id) {
         validSession();
         return taskCrud.read(id);
     }
 
 
-    public void updateTask(String categoryName,int id, String title, String description, LocalDate dueDate, Task.Status status, Task.Priority priority) {
+    public void updateTask(String title, String description, LocalDate dueDate, Task.Status status, Task.Priority priority) throws IOException{
         validSession();
-        Task newTask = new Task(id, title,description,dueDate,status, priority);
+        validCategoryToken();
+        validTaskToken();
 
-        taskToTaskCat.put(findCategoryIdByName(categoryName), id);
-        taskCrud.update(id, newTask);
+        Task newTask = new Task(title,description,dueDate,status, priority);
+
+        taskCrud.update(categoryToken,newTask);
+        categoryToTaskMap.put(categoryToken, categoryToTaskMap.get(categoryToken));
+
+        dataHandler.taskJson(taskCrud.getTaskMap());
+        dataHandler.categoryToTaskJson(getCategoryToTaskMap());
     }
 
-    public void deleteTask(String categoryName, int id) {
+    public void deleteTask(String taskName) throws IOException{
         validSession();
-        taskToTaskCat.remove(findCategoryIdByName(categoryName), id);
-        taskCrud.delete(id);
+        validCategoryToken();
+
+        taskCrud.delete(taskToken);
+        categoryToTaskMap.remove(categoryToken, taskToken);
+
+        dataHandler.taskJson(taskCrud.getTaskMap());
+        dataHandler.categoryToTaskJson(getCategoryToTaskMap());
+
     }
 
 

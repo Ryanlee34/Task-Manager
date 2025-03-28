@@ -1,19 +1,20 @@
 package model;
 import java.util.Objects;
+import java.util.UUID;
 
 /** Class that defines hashMap and relationships with task category class and tacitness of Task class */
 
 public class TaskCategory {
 
     /** Set variables*/
-    private int categoryId;
+    private final String categoryId;
     private String name;
     private String description;
 
     /** Validation Functions*/
-    private void validateId(int id) {
-        if (id < 0) {
-            throw new IllegalArgumentException("Invalid Argument for Id passed.");
+    private void validateId(String categoryId) {
+        if (categoryId== null || categoryId.trim().isEmpty()) {
+            throw new IllegalArgumentException("Category Id can't be Null or Empty.");
         }
     }
 
@@ -30,19 +31,19 @@ public class TaskCategory {
     }
 
     /** Constructor*/
-    public TaskCategory(int id, String name, String description) {
-        validateId(id);
+    public TaskCategory(String name, String description) {
+        this.categoryId = UUID.randomUUID().toString();
+        validateId(categoryId);
         validateName(name);
         validateDescription(description);
 
-        this.categoryId = categoryId;
         this.name = name;
         this.description = description;
 
     }
 
     /** Getters*/
-    public int getId() {
+    public String getId() {
         return categoryId;
     }
 
@@ -55,10 +56,6 @@ public class TaskCategory {
     }
 
     /** Setters*/
-    public void setId(int id) {
-        validateId(id);
-        this.categoryId = id;
-    }
 
     public void setName(String name) {
         validateName(name);

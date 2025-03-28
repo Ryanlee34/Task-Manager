@@ -1,5 +1,8 @@
 package repository;
+import model.Task;
 import model.User;
+
+import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
@@ -74,6 +77,10 @@ public class UserRepository implements CrudRepository<User, String> {
     public void delete(String userId) {
         validateUserId(userId);
         userMap.remove(userId);
+    }
+
+    public Map<String, User> getUserMap () {
+        return new HashMap<>(userMap);
     }
 
 

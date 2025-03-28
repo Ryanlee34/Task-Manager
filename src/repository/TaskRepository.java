@@ -1,12 +1,13 @@
 package repository;
 import model.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 
-public class TaskRepository implements CrudRepository<Task, Integer> {
-    private final Map<Integer, Task> taskMap;
+public class TaskRepository implements CrudRepository<Task, String> {
+    private final Map<String, Task> taskMap;
 
     private void validateTask(Task task) {
         if (task == null) {
@@ -20,7 +21,7 @@ public class TaskRepository implements CrudRepository<Task, Integer> {
         }
     }
 
-    private void validateId(int id) {
+    private void validateId(String id) {
         if (!taskMap.containsKey(id)) {
             throw new IllegalArgumentException("Task key Invalid.");
         }
@@ -52,7 +53,7 @@ public class TaskRepository implements CrudRepository<Task, Integer> {
     }
 
 
-    public TaskRepository(Map<Integer, Task> taskMap) {
+    public TaskRepository(Map<String, Task> taskMap) {
         this.taskMap = taskMap;
     }
 
@@ -68,7 +69,7 @@ public class TaskRepository implements CrudRepository<Task, Integer> {
     }
 
     @Override
-    public Task read(Integer id) {
+    public Task read(String id) {
         validateId(id);
         return taskMap.get(id);
 
@@ -81,7 +82,7 @@ public class TaskRepository implements CrudRepository<Task, Integer> {
     }
 
     @Override
-    public void update(Integer id, Task task) {
+    public void update(String id, Task task) {
         validateTask(task);
         validateId(task);
         validateTitle(task);
@@ -93,10 +94,14 @@ public class TaskRepository implements CrudRepository<Task, Integer> {
     }
 
     @Override
-    public void delete(Integer id) {
+    public void delete(String id) {
         validateId(id);
 
         taskMap.remove(id);
+    }
+
+    public Map<String, Task> getTaskMap () {
+        return new HashMap<>(taskMap);
     }
 
 

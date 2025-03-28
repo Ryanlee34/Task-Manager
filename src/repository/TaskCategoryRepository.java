@@ -1,12 +1,13 @@
 package repository;
 import model.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 
-public class TaskCategoryRepository implements CrudRepository<TaskCategory, Integer> {
-    private final Map<Integer, TaskCategory> taskCatMap;
+public class TaskCategoryRepository implements CrudRepository<TaskCategory, String> {
+    private final Map<String, TaskCategory> taskCatMap;
 
 
     private void validateTaskCat(TaskCategory taskCategory) {
@@ -15,7 +16,7 @@ public class TaskCategoryRepository implements CrudRepository<TaskCategory, Inte
         }
     }
 
-    private void validateId(Integer id) {
+    private void validateId(String id) {
         if (taskCatMap.containsKey(id)) {
             throw new IllegalArgumentException("Id must be Unique.");
         }
@@ -53,7 +54,7 @@ public class TaskCategoryRepository implements CrudRepository<TaskCategory, Inte
     }
 
     @Override
-    public TaskCategory read(Integer id) {
+    public TaskCategory read(String id) {
         validateId(id);
         return taskCatMap.get(id);
     }
@@ -64,7 +65,7 @@ public class TaskCategoryRepository implements CrudRepository<TaskCategory, Inte
     }
 
     @Override
-    public void update(Integer id, TaskCategory taskCategory) {
+    public void update(String id, TaskCategory taskCategory) {
         validateId(id);
 
         taskCatMap.put(taskCategory.getId(), taskCategory);
@@ -72,10 +73,14 @@ public class TaskCategoryRepository implements CrudRepository<TaskCategory, Inte
     }
 
     @Override
-    public void delete(Integer id) {
+    public void delete(String id) {
         validateId(id);
         taskCatMap.remove(id);
 
+    }
+
+    public Map<String, TaskCategory> getCategoryMap () {
+        return new HashMap<>(taskCatMap);
     }
 
 

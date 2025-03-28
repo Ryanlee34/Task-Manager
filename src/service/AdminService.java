@@ -27,7 +27,7 @@ public class AdminService {
         }
     }
 
-    public AdminService(Map<String, User> userMap, Map<Integer, Task> taskMap, Map<Integer, TaskCategory> taskCatMap) {
+    public AdminService(Map<String, User> userMap, Map<String, Task> taskMap, Map<String, TaskCategory> taskCatMap) {
         this.userCrud = new UserRepository(userMap);
         this.taskCrud = new TaskRepository(taskMap);
         this.taskCatCrud = new TaskCategoryRepository(taskCatMap);

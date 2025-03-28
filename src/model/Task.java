@@ -1,11 +1,12 @@
 package model;
 import java.time.LocalDate;
+import java.util.UUID;
 
 /** Class that defines and initializes attributes to each individual class*/
 
 public class Task {
 
-    private int taskId;
+    private String taskId;
     private String title;
     private String description;
     private LocalDate dueDate;
@@ -16,7 +17,7 @@ public class Task {
         MEDIUM("Medium"),
         LOW("Low");
 
-        private String displayName;
+        private final String displayName;
 
         Priority(String displayName) {
             this.displayName = displayName;
@@ -33,7 +34,7 @@ public class Task {
         IN_PROGRESS("In Progress"),
         COMPLETED("Completed");
 
-        private String statusName;
+        private final String statusName;
 
         Status(String statusName) {
             this.statusName = statusName;
@@ -44,9 +45,9 @@ public class Task {
             return statusName;
         }
     }
-    private void validateId(int id){
-        if (id <= 0){
-            throw new IllegalArgumentException("Task ID must be a positive number greater than zero.");
+    private void validateId(String taskId){
+        if (taskId== null || taskId.trim().isEmpty()) {
+            throw new IllegalArgumentException("Category Id can't be Null or Empty.");
         }
     }
 
@@ -82,16 +83,18 @@ public class Task {
     }
 
     /** Constructor */
-    public Task(int id, String title, String description, LocalDate dueDate, Status status, Priority priority) {
+    public Task(String title, String description, LocalDate dueDate, Status status, Priority priority) {
+        this.taskId = UUID.randomUUID().toString();
+        validateId(taskId);
 
-        validateId(id);
+
         validateTitle(title);
         validatedDescription(description);
         validateDueDate(dueDate);
         validateStatus(status);
         validatePriority(priority);
 
-        this.taskId = id;
+
         this.title = title;
         this.description = description;
         this.dueDate = dueDate;
@@ -100,7 +103,7 @@ public class Task {
     }
 
     /** Getter Methods */
-    public int getId() {
+    public String getId() {
         return taskId;
     }
 
@@ -125,11 +128,6 @@ public class Task {
     }
 
     /**Setters */
-    public void setId(int id) {
-        validateId(id);
-        this.taskId = id;
-    }
-
     public void setTitle(String title) {
         validateTitle(title);
         this.title = title;
@@ -172,7 +170,7 @@ public class Task {
 
     @Override
     public int hashCode() {
-        return 31 *  taskId + title.hashCode() + description.hashCode() + dueDate.hashCode() + status.hashCode() + priority.hashCode();
+        return 31 *  taskId.hashCode() + title.hashCode() + description.hashCode() + dueDate.hashCode() + status.hashCode() + priority.hashCode();
     }
 
 
