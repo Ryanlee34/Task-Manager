@@ -27,6 +27,12 @@ public class TaskRepository implements CrudRepository<Task, String> {
         }
     }
 
+    private void validateUnusedId(Task task) {
+        if (taskMap.containsKey(task.getId())) {
+            throw new IllegalArgumentException("Task key Invalid.");
+        }
+    }
+
 
     private void validateTitle(Task task) {
         if (task.getTitle() == null) {
@@ -60,7 +66,7 @@ public class TaskRepository implements CrudRepository<Task, String> {
     @Override
     public void create(Task task) {
         validateTask(task);
-        validateId(task);
+        validateUnusedId(task);
         validateTitle(task);
         validateDescription(task);
         validateStatus(task);

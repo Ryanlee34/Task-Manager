@@ -31,13 +31,25 @@ public class TaskManager {
         this.dataHandler = dataHandler;
     }
 
+    public String getSessionToken () {
+        return sessionToken;
+    }
+
+    public String getCategoryToken () {
+        return categoryToken;
+    }
+
+    public String getTaskToken () {
+        return taskToken;
+    }
+
 
     /** Relationship methods*/
     private void createCategoryToTaskRelationship(String taskId, String categoryId) {
         categoryToTaskMap.put(taskId, categoryId);
     }
 
-    private void createUserToTaskRelationship(String userId, String taskCatId) {
+    private void createUserToCategoryRelationship(String userId, String taskCatId) {
         userToCategoryMap.put(userId, taskCatId);
     }
 
@@ -48,25 +60,6 @@ public class TaskManager {
 
     public Map<String, String> getUserToCategoryMap() {
         return userToCategoryMap;
-    }
-
-
-
-    /**Task Category Selection Method */
-    private String findCategoryIdByName(String categoryName) {
-        if(!validSession()) {
-            return null;
-        }
-
-        List<TaskCategory> allCategories = categoryCrud.readAll();
-        for(TaskCategory category : allCategories) {
-            if(userToCategoryMap.containsKey(sessionToken) &&
-                    userToCategoryMap.get(sessionToken).equals(category.getId()) &&
-                    category.getName().equalsIgnoreCase(categoryName)) {
-                return category.getId();
-            }
-        }
-        return null;
     }
 
     /** Sign in/out Methods*/
@@ -145,7 +138,7 @@ public class TaskManager {
     public User readUser() throws IOException {
         validSession();
         dataHandler.loadUserData();
-        return userCrud.read(sessionToken);
+         return userCrud.read(sessionToken);
     }
 
     public void update(String userName, String password, String fullName, String emailAddress) throws IOException {
@@ -188,7 +181,7 @@ public class TaskManager {
         }
         TaskCategory newTask = new TaskCategory( name, description);
 
-        createUserToTaskRelationship(sessionToken, categoryToken);
+        createUserToCategoryRelationship(sessionToken, categoryToken);
         categoryCrud.create(newTask);
         dataHandler.categoryJson(categoryCrud.getCategoryMap());
 
@@ -236,9 +229,10 @@ public class TaskManager {
         validCategoryToken();
 
         Task newTask = new Task(title, description, dueDate, status, priority);
-        createUserToTaskRelationship(sessionToken, categoryToken);
-        createCategoryToTaskRelationship(categoryToken, taskToken);
         taskCrud.create(newTask);
+
+        createUserToCategoryRelationship(sessionToken, categoryToken);
+        createCategoryToTaskRelationship(categoryToken, newTask.getId());
 
         dataHandler.taskJson(taskCrud.getTaskMap());
         dataHandler.categoryToTaskJson(getCategoryToTaskMap());

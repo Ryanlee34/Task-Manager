@@ -6,16 +6,16 @@ import java.util.UUID;
 
 public class Task {
 
-    private String taskId;
+    private final String taskId;
     private String title;
     private String description;
     private LocalDate dueDate;
     private Priority priority;
     private Status status;
     public enum Priority{
-        HIGH("High"),
-        MEDIUM("Medium"),
-        LOW("Low");
+        HIGH("HIGH"),
+        MEDIUM("MEDIUM"),
+        LOW("LOW");
 
         private final String displayName;
 
@@ -30,9 +30,9 @@ public class Task {
     }
 
     public enum Status{
-        TODO("To-do"),
-        IN_PROGRESS("In Progress"),
-        COMPLETED("Completed");
+        TODO("TO-DO"),
+        IN_PROGRESS("IN PROGRESS"),
+        COMPLETED("COMPLETED");
 
         private final String statusName;
 
@@ -47,7 +47,7 @@ public class Task {
     }
     private void validateId(String taskId){
         if (taskId== null || taskId.trim().isEmpty()) {
-            throw new IllegalArgumentException("Category Id can't be Null or Empty.");
+            throw new IllegalArgumentException("Task Id can't be Null or Empty.");
         }
     }
 
