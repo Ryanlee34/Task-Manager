@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 
-public class TaskCategoryRepository implements CrudRepository<TaskCategory, String> {
+public class TaskCategoryRepository implements CrudRepository<String, TaskCategory> {
     private final Map<String, TaskCategory> taskCatMap;
 
 
@@ -23,7 +23,7 @@ public class TaskCategoryRepository implements CrudRepository<TaskCategory, Stri
     }
 
     private void validateId(TaskCategory taskCategory) {
-        if(taskCatMap.containsKey(taskCategory.getId())) {
+        if(taskCatMap.containsKey(taskCategory.getCategoryId())) {
             throw new IllegalArgumentException("ID must be Unique.");
         }
     }
@@ -50,12 +50,11 @@ public class TaskCategoryRepository implements CrudRepository<TaskCategory, Stri
         validateId(taskCategory);
         validateName(taskCategory);
         validateDescription(taskCategory);
-        taskCatMap.put(taskCategory.getId(), taskCategory);
+        taskCatMap.put(taskCategory.getCategoryId(), taskCategory);
     }
 
     @Override
     public TaskCategory read(String id) {
-        validateId(id);
         return taskCatMap.get(id);
     }
 
@@ -66,15 +65,15 @@ public class TaskCategoryRepository implements CrudRepository<TaskCategory, Stri
 
     @Override
     public void update(String id, TaskCategory taskCategory) {
-        validateId(id);
 
-        taskCatMap.put(taskCategory.getId(), taskCategory);
+
+        taskCatMap.put(taskCategory.getCategoryId(), taskCategory);
 
     }
 
     @Override
     public void delete(String id) {
-        validateId(id);
+
         taskCatMap.remove(id);
 
     }

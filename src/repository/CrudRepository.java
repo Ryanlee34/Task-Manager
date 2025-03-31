@@ -1,7 +1,7 @@
 package repository;
 import java.util.List;
 
-interface CrudRepository<T, ID> {
+interface CrudRepository<ID, T> {
     void create(T entity);
     T read(ID id);
     List<T> readAll();

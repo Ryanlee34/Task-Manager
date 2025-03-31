@@ -1,4 +1,7 @@
 package model;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -102,8 +105,33 @@ public class Task {
         this.priority = priority;
     }
 
+    /** Constructor for Jackson */
+    @JsonCreator
+    public static Task create(
+            @JsonProperty("taskId") String taskId,
+            @JsonProperty("title") String title,
+            @JsonProperty("description") String description,
+        @JsonProperty("dueDate") LocalDate dueDate,
+        @JsonProperty("status") Status status,
+        @JsonProperty("priority") Priority priority
+    ) {
+        return new Task(taskId, title, description, dueDate, status, priority);
+
+    }
+    private Task(String taskId,String title, String description, LocalDate dueDate, Status status, Priority priority) {
+            this.taskId = taskId;
+            this.title = title;
+            this.description = description;
+            this.dueDate = dueDate;
+            this.status = status;
+            this.priority = priority;
+        }
+
+
+
+
     /** Getter Methods */
-    public String getId() {
+    public String getTaskId() {
         return taskId;
     }
 
@@ -156,7 +184,14 @@ public class Task {
     /** Override Methods */
     @Override
     public String toString(){
-        return "Task{Title: " + title + ", Description: "+description+ ", Task ID: "+ taskId + ", Due Date: "+ dueDate + ", Status: "+ status+ ",Priority: " + priority+ "}";
+        return "Task{Title: " + title + '\'' +
+                ", Description: "+description+ '\'' +
+                ", Task ID: "+ taskId + '\'' +
+                ", Due Date: "+ dueDate + '\'' +
+                ", Status: "
+                + status+ '\''  +
+                ", Priority: " + priority+ '\'' +
+                "}";
     }
 
     @Override

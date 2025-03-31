@@ -1,5 +1,4 @@
 package repository;
-import model.Task;
 import model.User;
 
 import java.util.HashMap;
@@ -9,7 +8,7 @@ import java.util.ArrayList;
 
 
 
-public class UserRepository implements CrudRepository<User, String> {
+public class UserRepository implements CrudRepository<String, User> {
     private final Map<String, User> userMap;
 
     private void validateUser(User user) {
@@ -49,7 +48,7 @@ public class UserRepository implements CrudRepository<User, String> {
         validateUserName(user);
         validateEmail(user);
 
-        userMap.put(user.getUniqueId(), user);
+        userMap.put(user.getUserUniqueId(), user);
 
     }
 
@@ -75,8 +74,9 @@ public class UserRepository implements CrudRepository<User, String> {
 
     @Override
     public void delete(String userId) {
-        validateUserId(userId);
+        System.out.println(userId);
         userMap.remove(userId);
+        System.out.println("Repo map "+ userMap);
     }
 
     public Map<String, User> getUserMap () {

@@ -1,4 +1,7 @@
 package model;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.UUID;
 import java.time.Instant;
 
@@ -92,6 +95,30 @@ public class User {
 
     }
 
+    /** Constructor for Jackson */
+    @JsonCreator
+    public static User create(
+            @JsonProperty(value = "userUniqueId", required = true) String userUniqueId,
+        @JsonProperty("accountType") AccountType accountType,
+        @JsonProperty("userName") String userName,
+        @JsonProperty("password") String password,
+        @JsonProperty("timeStamp") Instant timeStamp,
+        @JsonProperty("fullName") String fullName,
+        @JsonProperty("emailAddress") String emailAddress
+    ) {
+        System.out.println("JsonCreator called with ID: " + userUniqueId);
+        return new User(userUniqueId,userName, password, timeStamp, fullName, emailAddress, accountType);
+    }
+    private User (String userUniqueId,String userName, String password, Instant timeStamp, String fullName, String emailAddress, AccountType accountType) {
+        this.userUniqueId = userUniqueId;
+        this.accountType = accountType;
+        this.userName = userName;
+        this.password = password;
+        this.timeStamp = timeStamp;
+        this.fullName = fullName;
+        this.emailAddress = emailAddress;
+    }
+
     /**Authentication Methods*/
     public boolean verifyPassword(String enteredPassword) {
         return this.password.equals(enteredPassword);
@@ -102,12 +129,17 @@ public class User {
     }
 
     /**Getters*/
-    public String getUniqueId() {
+    public String getUserUniqueId() {
         return userUniqueId;
     }
 
     public String getUserName() {
         return userName;
+    }
+
+    //Will update at Later date to Hash Passwords
+    public String getPassword() {
+        return password;
     }
 
     public Instant getTimeStamp() {
@@ -149,7 +181,7 @@ public class User {
     }
 
     /** Helper methods */
-    public boolean isAdmin() {
+    public boolean CheckIsAdmin() {
         return this.accountType == AccountType.ADMIN;
     }
 
@@ -157,11 +189,11 @@ public class User {
     @Override
     public String toString() {
         return "User{" +
-                "uniqueId='" + userUniqueId + '\'' +
-                ", userName='" + userName + '\'' +
+                "UserName='" + userName + '\'' +
                 ", fullName='" + fullName + '\'' +
                 ", emailAddress='" + emailAddress + '\'' +
-                ", timeStamp=" + timeStamp +
+                ", timeStamp=" + timeStamp + '\'' +
+                ", accountType=" + accountType +
                 '}';
     }
 

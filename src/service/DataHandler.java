@@ -1,12 +1,16 @@
 package service;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.io.File;
 import java.io.FileNotFoundException;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
 import model.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -24,7 +28,7 @@ public class DataHandler {
 
 
      static {
-         try (InputStream inputStream = DataHandler.class.getClassLoader().getResourceAsStream("config.properties")) {
+         try (InputStream inputStream = DataHandler.class.getClassLoader().getResourceAsStream("src/resources/config.properties")) {
              if (inputStream != null) {
                  properties.load(inputStream);
              } else {
@@ -42,7 +46,7 @@ public class DataHandler {
 
 
      private void validateFile (File filepath) throws FileNotFoundException {
-         if (!filepath.exists() || filepath.length() <= 0) {
+         if (!filepath.exists()) {
              throw new FileNotFoundException("File does not exist or is empty");
          }
      }
@@ -55,13 +59,13 @@ public class DataHandler {
          objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
          objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
-         String dataDir = properties.getProperty("data.directory");
+         String dataDir = properties.getProperty("data.directory", "src/data");
 
-         this.userFilePath = dataDir + File.separator + properties.getProperty("user.file");
-         this.taskFilePath = dataDir + File.separator  + properties.getProperty("task.file");
-         this.categoryFilePath = dataDir + File.separator  + properties.getProperty("taskCategory.file");
-         this.userToCategoryFilePath = dataDir + File.separator  + properties.getProperty("userToCategory.file");
-         this.taskToTaskCatFilePath = dataDir + File.separator  + properties.getProperty("taskToTaskCat.file");
+         this.userFilePath = dataDir + File.separator + properties.getProperty("user.file", "users.json");
+         this.taskFilePath = dataDir + File.separator  + properties.getProperty("task.file", "tasks.json");
+         this.categoryFilePath = dataDir + File.separator  + properties.getProperty("taskCategory.file","categories.json");
+         this.userToCategoryFilePath = dataDir + File.separator  + properties.getProperty("userToCategory.file", "userToCategory.json");
+         this.taskToTaskCatFilePath = dataDir + File.separator  + properties.getProperty("taskToTaskCat.file","taskToTaskCat.json");
      }
 
 
@@ -99,6 +103,7 @@ public class DataHandler {
 
     public void userJson(Map<String, User> hashMap) throws IOException {
         objectMapper.writeValue(new File(userFilePath), hashMap);
+
     }
 
     public void taskJson(Map<String, Task> hashMap)throws IOException {
@@ -115,6 +120,14 @@ public class DataHandler {
 
     public void categoryToTaskJson(Map<String, String> hashMap)throws IOException {
         objectMapper.writeValue(new File(taskToTaskCatFilePath), hashMap);
+    }
+
+    public void SaveAllData(Map<String, User> userMap, Map<String, Task> taskMap, Map<String, TaskCategory> categoryMap, Map<String, String> userToCategoryMap,Map<String, String> categoryToTaskMap ) throws IOException {
+         userJson(userMap);
+         taskJson(taskMap);
+         categoryJson(categoryMap);
+         userToCategoryJson(userToCategoryMap);
+         categoryToTaskJson(categoryToTaskMap);
     }
 
 

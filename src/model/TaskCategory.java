@@ -1,4 +1,7 @@
 package model;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Objects;
 import java.util.UUID;
 
@@ -42,8 +45,23 @@ public class TaskCategory {
 
     }
 
+    /** Constructor for Jackson */
+    @JsonCreator
+    public static TaskCategory create(
+            @JsonProperty("categoryId") String categoryId,
+            @JsonProperty("String name") String name,
+            @JsonProperty("String description") String description
+    ) {
+        return new TaskCategory(categoryId, name, description);
+    }
+    private TaskCategory (String categoryId, String name, String description) {
+        this.categoryId = categoryId;
+        this.name = name;
+        this.description = description;
+    }
+
     /** Getters*/
-    public String getId() {
+    public String getCategoryId() {
         return categoryId;
     }
 
@@ -65,6 +83,15 @@ public class TaskCategory {
     public void setDescription(String description) {
         validateDescription(description);
         this.description = description;
+    }
+
+    @Override
+    public String toString() {
+        return "TaskCategory{" +
+                "categoryId= " + categoryId+ '\'' +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                '}';
     }
 
 

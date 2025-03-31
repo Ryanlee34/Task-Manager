@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 
-public class TaskRepository implements CrudRepository<Task, String> {
+public class TaskRepository implements CrudRepository<String, Task> {
     private final Map<String, Task> taskMap;
 
     private void validateTask(Task task) {
@@ -16,7 +16,7 @@ public class TaskRepository implements CrudRepository<Task, String> {
     }
 
     private void validateId(Task task) {
-        if (!taskMap.containsKey(task.getId())) {
+        if (!taskMap.containsKey(task.getTaskId())) {
             throw new IllegalArgumentException("Task key Invalid.");
         }
     }
@@ -28,7 +28,7 @@ public class TaskRepository implements CrudRepository<Task, String> {
     }
 
     private void validateUnusedId(Task task) {
-        if (taskMap.containsKey(task.getId())) {
+        if (taskMap.containsKey(task.getTaskId())) {
             throw new IllegalArgumentException("Task key Invalid.");
         }
     }
@@ -71,12 +71,12 @@ public class TaskRepository implements CrudRepository<Task, String> {
         validateDescription(task);
         validateStatus(task);
         validatePriority(task);
-        taskMap.put(task.getId(), task);
+        taskMap.put(task.getTaskId(), task);
     }
 
     @Override
     public Task read(String id) {
-        validateId(id);
+
         return taskMap.get(id);
 
     }
@@ -90,18 +90,18 @@ public class TaskRepository implements CrudRepository<Task, String> {
     @Override
     public void update(String id, Task task) {
         validateTask(task);
-        validateId(task);
+
         validateTitle(task);
         validateDescription(task);
         validateStatus(task);
         validatePriority(task);
 
-        taskMap.put(task.getId(), task);
+        taskMap.put(task.getTaskId(), task);
     }
 
     @Override
     public void delete(String id) {
-        validateId(id);
+
 
         taskMap.remove(id);
     }

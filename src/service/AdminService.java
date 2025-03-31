@@ -20,9 +20,9 @@ public class AdminService {
         }
     }
 
-    private void validateIsAdmin() {
+    public void validateIsAdmin() {
         User currentuser = userCrud.read(sessionToken);
-        if(!currentuser.isAdmin()) {
+        if(!currentuser.CheckIsAdmin()) {
             throw new IllegalArgumentException("Must be admin to access.");
         }
     }
@@ -39,7 +39,7 @@ public class AdminService {
 
         for (User user : users) {
             if (user.getUserName().equals(userName) && user.verifyPassword(password)) {
-                return sessionToken = user.getUniqueId();
+                return sessionToken = user.getUserUniqueId();
             }
         }
         return sessionToken = null;
@@ -70,4 +70,5 @@ public class AdminService {
         validateIsAdmin();
         return taskCatCrud.readAll();
     }
+
 }
